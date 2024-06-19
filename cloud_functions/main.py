@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 from google.cloud import bigquery
+from google.api_core.exceptions import GoogleCloudError
 
 def ingest_f1_data(request):
     url = 'http://ergast.com/api/f1/2023.json'
@@ -36,5 +37,6 @@ def ingest_f1_data(request):
 
     except requests.exceptions.RequestException as e:
         return f"Erro ao fazer requisição para a API: {e}"
-    except bigquery.GoogleCloudError as e:
+    except GoogleCloudError as e:
         return f"Erro ao carregar dados no BigQuery: {e}"
+
