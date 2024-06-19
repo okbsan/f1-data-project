@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from google.cloud import bigquery
-from google.api_core.exceptions import GoogleCloudError
+from google.api_core.exceptions import GoogleAPIError
 
 def ingest_f1_data(request):
     url = 'http://ergast.com/api/f1/2023.json'
