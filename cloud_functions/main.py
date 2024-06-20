@@ -24,39 +24,22 @@ def ingest_f1_data(request):
         logging.info("DataFrame criado: %s", df.head())
         logging.info("Colunas do DataFrame: %s", df.columns.tolist())
 
-        # Ajustar o esquema de acordo com as colunas presentes no DataFrame
-        schema = [
-            bigquery.SchemaField("season", "STRING"),
-            bigquery.SchemaField("round", "INTEGER"),
-            bigquery.SchemaField("url", "STRING"),
-            bigquery.SchemaField("raceName", "STRING"),
-            bigquery.SchemaField("Circuit.circuitId", "STRING"),
-            bigquery.SchemaField("Circuit.url", "STRING"),
-            bigquery.SchemaField("Circuit.circuitName", "STRING"),
-            bigquery.SchemaField("Circuit.Location.lat", "FLOAT"),
-            bigquery.SchemaField("Circuit.Location.long", "FLOAT"),
-            bigquery.SchemaField("Circuit.Location.locality", "STRING"),
-            bigquery.SchemaField("Circuit.Location.country", "STRING"),
-            bigquery.SchemaField("date", "DATE"),
-            bigquery.SchemaField("time", "STRING"),
-            bigquery.SchemaField("FirstPractice.date", "DATE"),
-            bigquery.SchemaField("FirstPractice.time", "STRING"),
-            bigquery.SchemaField("SecondPractice.date", "DATE"),
-            bigquery.SchemaField("SecondPractice.time", "STRING"),
-            bigquery.SchemaField("ThirdPractice.date", "DATE"),
-            bigquery.SchemaField("ThirdPractice.time", "STRING"),
-            bigquery.SchemaField("Qualifying.date", "DATE"),
-            bigquery.SchemaField("Qualifying.time", "STRING"),
-            bigquery.SchemaField("Sprint.date", "DATE"),
-            bigquery.SchemaField("Sprint.time", "STRING")
-        ]
+        # Convertendo tipos de dados no DataFrame
+        df['round'] = pd.to_numeric(df['round'], errors='coerce').fillna(0).astype(int)
+        df['Circuit.Location.lat'] = pd.to_numeric(df['Circuit.Location.lat'], errors='coerce')
+        df['Circuit.Location.long'] = pd.to_numeric(df['Circuit.Location.long'], errors='coerce')
+        df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
+        df['FirstPractice.date'] = pd.to_datetime(df['FirstPractice.date'], errors='coerce').dt.date
+        df['SecondPractice.date'] = pd.to_datetime(df['SecondPractice.date'], errors='coerce').dt.date
+        df['ThirdPractice.date'] = pd.to_datetime(df['ThirdPractice.date'], errors='coerce').dt.date
+        df['Qualifying.date'] = pd.to_datetime(df['Qualifying.date'], errors='coerce').dt.date
+        df['Sprint.date'] = pd.to_datetime(df['Sprint.date'], errors='coerce').dt.date
 
         client = bigquery.Client()
 
         table_id = 'weighty-sled-426016-i6.f1_data.races'
 
         job_config = bigquery.LoadJobConfig(
-            schema=schema,
             write_disposition=bigquery.WriteDisposition.WRITE_APPEND  # Append data to the table if it exists, otherwise create it
         )
 
