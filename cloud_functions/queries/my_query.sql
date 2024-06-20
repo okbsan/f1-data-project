@@ -1,4 +1,1 @@
-SELECT * 
-FROM `weighty-sled-426016-i6.f1_data.races` 
-ORDER BY round
-LIMIT 10;
+SELECT;
