@@ -1,22 +1,24 @@
-name: Deploy to Google Cloud Functions
+name: Deploy to Cloud Functions
 
 on:
   push:
     branches:
-      - main  # Defina a branch que disparará o deploy
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
+
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
+
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
@@ -24,7 +26,8 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         install_components: 'beta'
 
-    - name: Deploy to Cloud Functions
+
+    - name: Deploy ingest function
       run: |
         gcloud functions deploy ingest_f1_data \
           --runtime python39 \
@@ -32,4 +35,7 @@ jobs:
           --allow-unauthenticated \
           --entry-point ingest_f1_data \
           --source cloud_function  # Ajuste o caminho para a pasta onde está o código
+          --source cloud_functions \
+          --entry-point ingest_f1_data
+
 
