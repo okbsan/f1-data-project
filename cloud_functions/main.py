@@ -81,11 +81,25 @@ def run_query(request):
         query_job = client.query(query)
         results = query_job.result()  # Aguarda a conclusão da query
 
-        # Processar resultados se necessário
+        # Processar resultados e converter para DataFrame
         rows = list(results)
-        logging.info("Resultados da query: %s", rows)
+        df = pd.DataFrame(rows, columns=[field.name for field in results.schema])
 
-        return 'Query executada com sucesso!'
+        # Log para verificar a quantidade de resultados retornados
+        logging.info("Número de linhas retornadas: %d", len(rows))
+
+        # Gravar os resultados em uma nova tabela no BigQuery
+        result_table_id = 'weighty-sled-426016-i6.f1_data.query_results'
+        job_config = bigquery.LoadJobConfig(
+            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE  # Sobrescreve a tabela se ela já existir
+        )
+
+        logging.info("Gravando os resultados da query na tabela %s", result_table_id)
+        load_job = client.load_table_from_dataframe(df, result_table_id, job_config=job_config)
+        load_job.result()
+        logging.info("Resultados gravados com sucesso na tabela %s", result_table_id)
+
+        return f"Query executada com sucesso! Número de linhas retornadas: {len(rows)}"
 
     except GoogleAPIError as e:
         logging.error("Erro ao executar query no BigQuery: %s", e)
