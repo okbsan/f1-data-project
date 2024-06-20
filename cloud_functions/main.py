@@ -3,6 +3,7 @@ import pandas as pd
 from google.cloud import bigquery
 from google.api_core.exceptions import GoogleAPIError
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 
@@ -63,6 +64,37 @@ def ingest_f1_data(request):
     except Exception as e:
         logging.error("Erro inesperado: %s", e)
         return f"Erro inesperado: {e}"
+
+def run_query(request):
+    client = bigquery.Client()
+
+    # Caminho para o arquivo SQL
+    query_path = os.path.join(os.path.dirname(__file__), 'queries', 'my_query.sql')
+
+    # Ler o conteúdo do arquivo SQL
+    with open(query_path, 'r') as query_file:
+        query = query_file.read()
+
+    logging.info("Executando query: %s", query)
+
+    try:
+        query_job = client.query(query)
+        results = query_job.result()  # Aguarda a conclusão da query
+
+        # Processar resultados se necessário
+        rows = list(results)
+        logging.info("Resultados da query: %s", rows)
+
+        return 'Query executada com sucesso!'
+
+    except GoogleAPIError as e:
+        logging.error("Erro ao executar query no BigQuery: %s", e)
+        return f"Erro ao executar query no BigQuery: {e}"
+    except Exception as e:
+        logging.error("Erro inesperado: %s", e)
+        return f"Erro inesperado: {e}"
+
+
 
 
 
