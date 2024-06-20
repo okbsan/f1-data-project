@@ -20,20 +20,23 @@ def ingest_f1_data(request):
         races = data['MRData']['RaceTable']['Races']
         df = pd.json_normalize(races)
 
+        # Renomear colunas para remover pontos
+        df.columns = [col.replace('.', '_') for col in df.columns]
+
         # Verificar o DataFrame criado e suas colunas
         logging.info("DataFrame criado: %s", df.head())
         logging.info("Colunas do DataFrame: %s", df.columns.tolist())
 
         # Convertendo tipos de dados no DataFrame
         df['round'] = pd.to_numeric(df['round'], errors='coerce').fillna(0).astype(int)
-        df['Circuit.Location.lat'] = pd.to_numeric(df['Circuit.Location.lat'], errors='coerce')
-        df['Circuit.Location.long'] = pd.to_numeric(df['Circuit.Location.long'], errors='coerce')
+        df['Circuit_Location_lat'] = pd.to_numeric(df['Circuit_Location_lat'], errors='coerce')
+        df['Circuit_Location_long'] = pd.to_numeric(df['Circuit_Location_long'], errors='coerce')
         df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
-        df['FirstPractice.date'] = pd.to_datetime(df['FirstPractice.date'], errors='coerce').dt.date
-        df['SecondPractice.date'] = pd.to_datetime(df['SecondPractice.date'], errors='coerce').dt.date
-        df['ThirdPractice.date'] = pd.to_datetime(df['ThirdPractice.date'], errors='coerce').dt.date
-        df['Qualifying.date'] = pd.to_datetime(df['Qualifying.date'], errors='coerce').dt.date
-        df['Sprint.date'] = pd.to_datetime(df['Sprint.date'], errors='coerce').dt.date
+        df['FirstPractice_date'] = pd.to_datetime(df['FirstPractice_date'], errors='coerce').dt.date
+        df['SecondPractice_date'] = pd.to_datetime(df['SecondPractice_date'], errors='coerce').dt.date
+        df['ThirdPractice_date'] = pd.to_datetime(df['ThirdPractice_date'], errors='coerce').dt.date
+        df['Qualifying_date'] = pd.to_datetime(df['Qualifying_date'], errors='coerce').dt.date
+        df['Sprint_date'] = pd.to_datetime(df['Sprint_date'], errors='coerce').dt.date
 
         client = bigquery.Client()
 
@@ -60,5 +63,6 @@ def ingest_f1_data(request):
     except Exception as e:
         logging.error("Erro inesperado: %s", e)
         return f"Erro inesperado: {e}"
+
 
 
